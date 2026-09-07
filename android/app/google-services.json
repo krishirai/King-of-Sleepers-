@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1079540447962",
+    "project_id": "king-of-sleepers-c221d",
+    "storage_bucket": "king-of-sleepers-c221d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1079540447962:android:700303a33243ad9aff03e3",
+        "android_client_info": {
+          "package_name": "com.example.sleeping_king"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBq12a2mqBfbBZtssgu340Vh-r5ERnmcRA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
