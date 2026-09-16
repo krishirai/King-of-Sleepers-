@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'current_nap_spot_page.dart';
+import 'screens/rating_screen.dart';
 
 class NapPlacesPage extends StatelessWidget {
   const NapPlacesPage({super.key});
@@ -68,6 +69,17 @@ class NapPlacesPage extends StatelessWidget {
                 availableSeats: availableSeats,
                 latitude: latitude,
                 longitude: longitude,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => RatingScreen(
+                        locationId: document.id,
+                        locationName: name,
+                      ),
+                    ),
+                  );
+                },
               );
             },
           );
@@ -83,6 +95,7 @@ class NapPlaceCard extends StatelessWidget {
   final int availableSeats;
   final double? latitude;
   final double? longitude;
+  final VoidCallback? onTap;
 
   const NapPlaceCard({
     super.key,
@@ -91,6 +104,7 @@ class NapPlaceCard extends StatelessWidget {
     required this.availableSeats,
     required this.latitude,
     required this.longitude,
+    this.onTap,
   });
 
   @override
@@ -107,6 +121,7 @@ class NapPlaceCard extends StatelessWidget {
             ),
             isThreeLine: true,
             trailing: const Icon(Icons.chevron_right),
+            onTap: onTap,
           ),
 
           Padding(
