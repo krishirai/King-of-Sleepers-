@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -63,9 +64,6 @@ class _LoginScreenState extends State<LoginScreen> {
           password: _passwordController.text.trim(),
         );
       }
-      // If successful, navigation is normally handled by a listener on
-      // authStateChanges() higher up (e.g. in main.dart), so nothing
-      // else is needed here.
     } on FirebaseAuthException catch (e) {
       setState(() {
         _errorMessage = _mapAuthError(e.code);
@@ -93,31 +91,22 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      // Make sure initialize() finished (it's called from initState, but
-      // guard here in case the button is tapped very quickly).
       if (!_googleInitialized) {
         await GoogleSignIn.instance.initialize();
         _googleInitialized = true;
       }
 
-      // v7 API: authenticate() replaces the old signIn(). It throws
-      // GoogleSignInException (instead of returning null) if the user
-      // cancels, so we catch that below.
       final GoogleSignInAccount googleUser =
           await GoogleSignIn.instance.authenticate();
 
-      // Authentication (identity) is now synchronous and separate from
-      // authorization (access tokens for APIs).
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
-      // Firebase only needs the idToken to sign the user in.
       final credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
 
       await _auth.signInWithCredential(credential);
     } on GoogleSignInException catch (e) {
-      // User closed the account picker / cancelled — not a real error.
       if (e.code == GoogleSignInExceptionCode.canceled) {
         setState(() => _isLoading = false);
         return;
@@ -178,6 +167,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Logo (placeholder icon until a real logo image is ready)
+                  Icon(
+                    Icons.self_improvement,
+                    size: 100,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(height: 24),
+
                   Text(
                     _isLogin ? 'Sign In' : 'Create Account',
                     style: Theme.of(context).textTheme.headlineMedium,
