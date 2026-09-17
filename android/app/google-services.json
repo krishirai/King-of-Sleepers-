@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "554206459812",
+    "project_id": "king-of-sleeping",
+    "storage_bucket": "king-of-sleeping.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:554206459812:android:b37d402edc2ce19128f331",
+        "android_client_info": {
+          "package_name": "com.example.sleeping_king"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwHmgO6EtJrbF1ZTHr-ZzMOMtWestNnZs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
