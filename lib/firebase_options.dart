@@ -63,6 +63,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1079540447962',
     projectId: 'king-of-sleepers-c221d',
     storageBucket: 'king-of-sleepers-c221d.firebasestorage.app',
+    androidClientId: '1079540447962-efeps1lfm63dka113t4146b71dk0p16h.apps.googleusercontent.com',
+    iosClientId: '1079540447962-nltq8uf11fgf751hk2uspnosvpinch8b.apps.googleusercontent.com',
     iosBundleId: 'com.example.sleepingKing',
   );
   static const FirebaseOptions macos = FirebaseOptions(
@@ -71,6 +73,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1079540447962',
     projectId: 'king-of-sleepers-c221d',
     storageBucket: 'king-of-sleepers-c221d.firebasestorage.app',
+    androidClientId: '1079540447962-efeps1lfm63dka113t4146b71dk0p16h.apps.googleusercontent.com',
+    iosClientId: '1079540447962-nltq8uf11fgf751hk2uspnosvpinch8b.apps.googleusercontent.com',
     iosBundleId: 'com.example.sleepingKing',
   );
 
