@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'current_nap_spot_page.dart';
 
@@ -10,6 +11,15 @@ class NapPlacesPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Napping Places'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+            },
+          ),
+        ],
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -24,9 +34,7 @@ class NapPlacesPage extends StatelessWidget {
 
           if (snapshot.hasError) {
             return Center(
-              child: Text(
-                'Error: ${snapshot.error}',
-              ),
+              child: Text('Error: ${snapshot.error}'),
             );
           }
 
@@ -56,18 +64,17 @@ class NapPlacesPage extends StatelessWidget {
               final int availableSeats =
                   (data['availableSeats'] as num?)?.toInt() ?? 0;
 
-              final double? latitude =
-                  (data['latitude'] as num?)?.toDouble();
-
-              final double? longitude =
-                  (data['longitude'] as num?)?.toDouble();
+              final GeoPoint? geoPoint =
+                  data['latitude'] is GeoPoint
+                      ? data['latitude'] as GeoPoint
+                      : null;
 
               return NapPlaceCard(
                 name: name,
                 location: location,
                 availableSeats: availableSeats,
-                latitude: latitude,
-                longitude: longitude,
+                latitude: geoPoint?.latitude,
+                longitude: geoPoint?.longitude,
               );
             },
           );
@@ -97,53 +104,31 @@ class NapPlaceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.bed),
-            title: Text(name),
-            subtitle: Text(
-              '$location\nAvailable seats: $availableSeats',
-            ),
-            isThreeLine: true,
-            trailing: const Icon(Icons.chevron_right),
-          ),
+      child: ListTile(
+        leading: const Icon(Icons.bed),
+        title: Text(name),
+        subtitle: Text(
+          '$location\nAvailable seats: $availableSeats',
+        ),
+        isThreeLine: true,
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () {
+          if (latitude == null || longitude == null) {
+            return;
+          }
 
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.location_on),
-                label: const Text('Set as Current Spot'),
-                onPressed: () {
-                  if (latitude == null || longitude == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Location coordinates are missing.',
-                        ),
-                      ),
-                    );
-                    return;
-                  }
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CurrentNapSpotPage(
-                        name: name,
-                        location: location,
-                        latitude: latitude!,
-                        longitude: longitude!,
-                      ),
-                    ),
-                  );
-                },
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CurrentNapSpotPage(
+                name: name,
+                location: location,
+                latitude: latitude!,
+                longitude: longitude!,
               ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
