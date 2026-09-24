@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'current_nap_spot_page.dart';
+import 'screens/rating_screen.dart';
 
 class NapPlacesPage extends StatelessWidget {
   const NapPlacesPage({super.key});
@@ -64,17 +65,29 @@ class NapPlacesPage extends StatelessWidget {
               final int availableSeats =
                   (data['availableSeats'] as num?)?.toInt() ?? 0;
 
-              final GeoPoint? geoPoint =
-                  data['latitude'] is GeoPoint
-                      ? data['latitude'] as GeoPoint
-                      : null;
+              final double? latitude =
+                  (data['latitude'] as num?)?.toDouble();
+
+              final double? longitude =
+                  (data['longitude'] as num?)?.toDouble();
 
               return NapPlaceCard(
                 name: name,
                 location: location,
                 availableSeats: availableSeats,
-                latitude: geoPoint?.latitude,
-                longitude: geoPoint?.longitude,
+                latitude: latitude,
+                longitude: longitude,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => RatingScreen(
+                        locationId: document.id,
+                        locationName: name,
+                      ),
+                    ),
+                  );
+                },
               );
             },
           );
@@ -90,6 +103,7 @@ class NapPlaceCard extends StatelessWidget {
   final int availableSeats;
   final double? latitude;
   final double? longitude;
+  final VoidCallback? onTap;
 
   const NapPlaceCard({
     super.key,
@@ -98,37 +112,60 @@ class NapPlaceCard extends StatelessWidget {
     required this.availableSeats,
     required this.latitude,
     required this.longitude,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: const Icon(Icons.bed),
-        title: Text(name),
-        subtitle: Text(
-          '$location\nAvailable seats: $availableSeats',
-        ),
-        isThreeLine: true,
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () {
-          if (latitude == null || longitude == null) {
-            return;
-          }
+      child: Column(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.bed),
+            title: Text(name),
+            subtitle: Text(
+              '$location\nAvailable seats: $availableSeats',
+            ),
+            isThreeLine: true,
+            trailing: const Icon(Icons.chevron_right),
+            onTap: onTap,
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.location_on),
+                label: const Text('Set as Current Spot'),
+                onPressed: () {
+                  if (latitude == null || longitude == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Location coordinates are missing.',
+                        ),
+                      ),
+                    );
+                    return;
+                  }
 
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CurrentNapSpotPage(
-                name: name,
-                location: location,
-                latitude: latitude!,
-                longitude: longitude!,
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CurrentNapSpotPage(
+                        name: name,
+                        location: location,
+                        latitude: latitude!,
+                        longitude: longitude!,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }

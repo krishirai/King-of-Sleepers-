@@ -16,7 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  bool _isLogin = true; // true = login mode, false = register mode
+  bool _isLogin = true;
   bool _isLoading = false;
   bool _googleInitialized = false;
   String? _errorMessage;
@@ -27,7 +27,6 @@ class _LoginScreenState extends State<LoginScreen> {
     _initGoogleSignIn();
   }
 
-  // google_sign_in v7+ requires calling initialize() once before use.
   Future<void> _initGoogleSignIn() async {
     await GoogleSignIn.instance.initialize();
     _googleInitialized = true;
@@ -40,9 +39,6 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  // ---------------------------------------------------------------
-  // EMAIL / PASSWORD
-  // ---------------------------------------------------------------
   Future<void> _submitEmailPassword() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -63,9 +59,6 @@ class _LoginScreenState extends State<LoginScreen> {
           password: _passwordController.text.trim(),
         );
       }
-      // If successful, navigation is normally handled by a listener on
-      // authStateChanges() higher up (e.g. in main.dart), so nothing
-      // else is needed here.
     } on FirebaseAuthException catch (e) {
       setState(() {
         _errorMessage = _mapAuthError(e.code);
@@ -83,9 +76,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // ---------------------------------------------------------------
-  // GOOGLE SIGN-IN
-  // ---------------------------------------------------------------
   Future<void> _signInWithGoogle() async {
     setState(() {
       _isLoading = true;
@@ -93,35 +83,28 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      // Make sure initialize() finished (it's called from initState, but
-      // guard here in case the button is tapped very quickly).
       if (!_googleInitialized) {
         await GoogleSignIn.instance.initialize();
         _googleInitialized = true;
       }
 
-      // v7 API: authenticate() replaces the old signIn(). It throws
-      // GoogleSignInException (instead of returning null) if the user
-      // cancels, so we catch that below.
       final GoogleSignInAccount googleUser =
           await GoogleSignIn.instance.authenticate();
 
-      // Authentication (identity) is now synchronous and separate from
-      // authorization (access tokens for APIs).
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          googleUser.authentication;
 
-      // Firebase only needs the idToken to sign the user in.
       final credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
 
       await _auth.signInWithCredential(credential);
     } on GoogleSignInException catch (e) {
-      // User closed the account picker / cancelled — not a real error.
       if (e.code == GoogleSignInExceptionCode.canceled) {
         setState(() => _isLoading = false);
         return;
       }
+
       setState(() {
         _errorMessage = 'Could not sign in with Google.';
       });
@@ -142,9 +125,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // ---------------------------------------------------------------
-  // HELPERS
-  // ---------------------------------------------------------------
   String _mapAuthError(String code) {
     switch (code) {
       case 'user-not-found':
@@ -162,9 +142,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // ---------------------------------------------------------------
-  // UI
-  // ---------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -178,6 +155,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Icon(
+                    Icons.self_improvement,
+                    size: 100,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(height: 24),
+
                   Text(
                     _isLogin ? 'Sign In' : 'Create Account',
                     style: Theme.of(context).textTheme.headlineMedium,
@@ -185,7 +169,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 32),
 
-                  // Email field
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -205,7 +188,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Password field
                   TextFormField(
                     controller: _passwordController,
                     obscureText: true,
@@ -225,7 +207,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Error message
                   if (_errorMessage != null)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),
@@ -236,7 +217,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
 
-                  // Submit button (login or register depending on mode)
                   ElevatedButton(
                     onPressed: _isLoading ? null : _submitEmailPassword,
                     style: ElevatedButton.styleFrom(
@@ -252,7 +232,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 8),
 
-                  // Toggle between login/register
                   TextButton(
                     onPressed: _isLoading
                         ? null
@@ -282,7 +261,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Google Sign-In button
                   OutlinedButton.icon(
                     onPressed: _isLoading ? null : _signInWithGoogle,
                     icon: const Icon(Icons.g_mobiledata, size: 28),

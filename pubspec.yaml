@@ -1,3 +1,4 @@
+
 name: sleeping_king
 
 description: "A new Flutter project."
@@ -14,8 +15,9 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
+
   firebase_core: ^4.14.0
-  firebase_auth: ^6.6.1
+  firebase_auth: ^6.7.0
   google_sign_in: ^7.2.0
   cloud_firestore: ^6.10.0
   flutter_map: ^8.3.2
@@ -31,3 +33,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
