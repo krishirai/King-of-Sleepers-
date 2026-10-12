@@ -53,23 +53,28 @@ class NapPlacesPage extends StatelessWidget {
             itemBuilder: (context, index) {
               final document = documents[index];
 
-              final data =
-                  document.data() as Map<String, dynamic>;
+              final raw = document.data() as Map<String, dynamic>;
+              final data = {for (final e in raw.entries) e.key.trim(): e.value};
 
-              final String name =
-                  data['name'] ?? 'Unknown place';
+              final String name = data['name']?.toString() ?? 'Unknown place';
 
               final String location =
-                  data['location'] ?? 'Unknown location';
+                  data['location']?.toString() ?? 'Unknown location';
 
               final int availableSeats =
                   (data['availableSeats'] as num?)?.toInt() ?? 0;
 
-              final double? latitude =
-                  (data['latitude'] as num?)?.toDouble();
+              double? latitude;
+              double? longitude;
 
-              final double? longitude =
-                  (data['longitude'] as num?)?.toDouble();
+              final dynamic latValue = data['latitude'];
+              if (latValue is GeoPoint) {
+                latitude = latValue.latitude;
+                longitude = latValue.longitude;
+              } else {
+                latitude = (latValue as num?)?.toDouble();
+                longitude = (data['longitude'] as num?)?.toDouble();
+              }
 
               return NapPlaceCard(
                 name: name,
