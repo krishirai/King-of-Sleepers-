@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'current_nap_spot_page.dart';
 import 'screens/rating_screen.dart';
@@ -11,6 +12,15 @@ class NapPlacesPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Napping Places'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+            },
+          ),
+        ],
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -25,9 +35,7 @@ class NapPlacesPage extends StatelessWidget {
 
           if (snapshot.hasError) {
             return Center(
-              child: Text(
-                'Error: ${snapshot.error}',
-              ),
+              child: Text('Error: ${snapshot.error}'),
             );
           }
 
@@ -123,7 +131,6 @@ class NapPlaceCard extends StatelessWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: onTap,
           ),
-
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: SizedBox(

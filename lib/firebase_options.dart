@@ -41,48 +41,50 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCX0qt1vX0t8aj3seceHxAlnKzkHmT4xB4',
-    appId: '1:554206459812:web:01d7b4bfec12959028f331',
-    messagingSenderId: '554206459812',
-    projectId: 'king-of-sleeping',
-    authDomain: 'king-of-sleeping.firebaseapp.com',
-    storageBucket: 'king-of-sleeping.firebasestorage.app',
-    measurementId: 'G-00191VJLH7',
+    apiKey: 'AIzaSyCRwAKRsm50A4ycJvjneEGtJs2l9uaCGvY',
+    appId: '1:1079540447962:web:b65da2774d1019ddff03e3',
+    messagingSenderId: '1079540447962',
+    projectId: 'king-of-sleepers-c221d',
+    authDomain: 'king-of-sleepers-c221d.firebaseapp.com',
+    storageBucket: 'king-of-sleepers-c221d.firebasestorage.app',
+    measurementId: 'G-DL1BQ8W7P8',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCwHmgO6EtJrbF1ZTHr-ZzMOMtWestNnZs',
-    appId: '1:554206459812:android:b37d402edc2ce19128f331',
-    messagingSenderId: '554206459812',
-    projectId: 'king-of-sleeping',
-    storageBucket: 'king-of-sleeping.firebasestorage.app',
+    apiKey: 'AIzaSyBq12a2mqBfbBZtssgu340Vh-r5ERnmcRA',
+    appId: '1:1079540447962:android:700303a33243ad9aff03e3',
+    messagingSenderId: '1079540447962',
+    projectId: 'king-of-sleepers-c221d',
+    storageBucket: 'king-of-sleepers-c221d.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCQ1c6jtxkvdRI9dUjc2wVy3I6zp_SOYXk',
-    appId: '1:554206459812:ios:5cef8d230bc1199828f331',
-    messagingSenderId: '554206459812',
-    projectId: 'king-of-sleeping',
-    storageBucket: 'king-of-sleeping.firebasestorage.app',
+    apiKey: 'AIzaSyCP7dlJI-0dz1fOmWGXgIwyBg4faKqGdsU',
+    appId: '1:1079540447962:ios:727a26075597a34fff03e3',
+    messagingSenderId: '1079540447962',
+    projectId: 'king-of-sleepers-c221d',
+    storageBucket: 'king-of-sleepers-c221d.firebasestorage.app',
+    androidClientId: '1079540447962-efeps1lfm63dka113t4146b71dk0p16h.apps.googleusercontent.com',
+    iosClientId: '1079540447962-nltq8uf11fgf751hk2uspnosvpinch8b.apps.googleusercontent.com',
     iosBundleId: 'com.example.sleepingKing',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCQ1c6jtxkvdRI9dUjc2wVy3I6zp_SOYXk',
-    appId: '1:554206459812:ios:5cef8d230bc1199828f331',
-    messagingSenderId: '554206459812',
-    projectId: 'king-of-sleeping',
-    storageBucket: 'king-of-sleeping.firebasestorage.app',
+    apiKey: 'AIzaSyCP7dlJI-0dz1fOmWGXgIwyBg4faKqGdsU',
+    appId: '1:1079540447962:ios:727a26075597a34fff03e3',
+    messagingSenderId: '1079540447962',
+    projectId: 'king-of-sleepers-c221d',
+    storageBucket: 'king-of-sleepers-c221d.firebasestorage.app',
+    androidClientId: '1079540447962-efeps1lfm63dka113t4146b71dk0p16h.apps.googleusercontent.com',
+    iosClientId: '1079540447962-nltq8uf11fgf751hk2uspnosvpinch8b.apps.googleusercontent.com',
     iosBundleId: 'com.example.sleepingKing',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCX0qt1vX0t8aj3seceHxAlnKzkHmT4xB4',
-    appId: '1:554206459812:web:e92ac6c5cc0793ca28f331',
-    messagingSenderId: '554206459812',
-    projectId: 'king-of-sleeping',
-    authDomain: 'king-of-sleeping.firebaseapp.com',
-    storageBucket: 'king-of-sleeping.firebasestorage.app',
-    measurementId: 'G-Y7MKV48D33',
+    apiKey: 'AIzaSyCRwAKRsm50A4ycJvjneEGtJs2l9uaCGvY',
+    appId: '1:1079540447962:web:04c1fcc7728325a4ff03e3',
+    messagingSenderId: '1079540447962',
+    projectId: 'king-of-sleepers-c221d',
+    authDomain: 'king-of-sleepers-c221d.firebaseapp.com',
+    storageBucket: 'king-of-sleepers-c221d.firebasestorage.app',
+    measurementId: 'G-29NCC5WTND',
   );
 }
