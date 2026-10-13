@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'current_nap_spot_page.dart';
-import 'screens/rating_screen.dart';
+import 'nap_place_details_page.dart';
 
 class NapPlacesPage extends StatelessWidget {
   const NapPlacesPage({super.key});
@@ -64,6 +64,14 @@ class NapPlacesPage extends StatelessWidget {
               final int availableSeats =
                   (data['availableSeats'] as num?)?.toInt() ?? 0;
 
+              final dynamic powerSocketValue = data['hasPowerSocket'];
+
+              final bool? hasPowerSocket =
+                  powerSocketValue is bool ? powerSocketValue : null;
+
+              final String seatingType =
+                  data['seatingType']?.toString() ?? 'Not specified';
+
               double? latitude;
               double? longitude;
 
@@ -80,15 +88,21 @@ class NapPlacesPage extends StatelessWidget {
                 name: name,
                 location: location,
                 availableSeats: availableSeats,
+                hasPowerSocket: hasPowerSocket,
+                seatingType: seatingType,
                 latitude: latitude,
                 longitude: longitude,
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => RatingScreen(
+                      builder: (_) => NapPlaceDetailsPage(
                         locationId: document.id,
-                        locationName: name,
+                        name: name,
+                        location: location,
+                        availableSeats: availableSeats,
+                        hasPowerSocket: hasPowerSocket,
+                        seatingType: seatingType,
                       ),
                     ),
                   );
@@ -109,6 +123,8 @@ class NapPlaceCard extends StatelessWidget {
   final double? latitude;
   final double? longitude;
   final VoidCallback? onTap;
+  final bool? hasPowerSocket;
+  final String seatingType;
 
   const NapPlaceCard({
     super.key,
@@ -118,6 +134,8 @@ class NapPlaceCard extends StatelessWidget {
     required this.latitude,
     required this.longitude,
     this.onTap,
+    this.hasPowerSocket,
+    this.seatingType = 'Not specified',
   });
 
   @override
@@ -130,9 +148,11 @@ class NapPlaceCard extends StatelessWidget {
             leading: const Icon(Icons.bed),
             title: Text(name),
             subtitle: Text(
-              '$location\nAvailable seats: $availableSeats',
+              '$location\nAvailable seats: $availableSeats\n'
+              'Power socket: ${hasPowerSocket == null ? "Not specified" : hasPowerSocket! ? "Available" : "Not available"}\n'
+              'Seating type: $seatingType',
             ),
-            isThreeLine: true,
+            isThreeLine: false,
             trailing: const Icon(Icons.chevron_right),
             onTap: onTap,
           ),
