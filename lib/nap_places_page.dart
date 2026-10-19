@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'current_nap_spot_page.dart';
 import 'nap_place_details_page.dart';
+import 'package:share_plus/share_plus.dart';
 
 class NapPlacesPage extends StatelessWidget {
   const NapPlacesPage({super.key});
@@ -138,6 +139,19 @@ class NapPlaceCard extends StatelessWidget {
     this.seatingType = 'Not specified',
   });
 
+  void _shareSpot() {
+    final mapsLink = (latitude != null && longitude != null)
+        ? '\nhttps://www.google.com/maps/search/?api=1&query=$latitude,$longitude'
+        : '';
+
+    SharePlus.instance.share(
+      ShareParams(
+        text: 'Check out this nap spot: $name ($location)$mapsLink'
+            '\n\nShared from King of Sleepers',
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -153,7 +167,17 @@ class NapPlaceCard extends StatelessWidget {
               'Seating type: $seatingType',
             ),
             isThreeLine: false,
-            trailing: const Icon(Icons.chevron_right),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.share),
+                  tooltip: 'Share',
+                  onPressed: _shareSpot,
+                ),
+                const Icon(Icons.chevron_right),
+              ],
+            ),
             onTap: onTap,
           ),
           Padding(
