@@ -125,6 +125,40 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _resetPassword() async {
+    final email = _emailController.text.trim();
+
+    if (email.isEmpty || !email.contains('@')) {
+      setState(() {
+        _errorMessage = 'Enter your email above to reset your password.';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'If an account exists for $email, a reset link has been sent.',
+          ),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      setState(() => _errorMessage = _mapAuthError(e.code));
+    } catch (e) {
+      setState(() => _errorMessage = 'Something went wrong. Please try again.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   String _mapAuthError(String code) {
     switch (code) {
       case 'user-not-found':
@@ -205,6 +239,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       return null;
                     },
                   ),
+
+                  if (_isLogin)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: _isLoading ? null : _resetPassword,
+                        child: const Text('Forgot password?'),
+                      ),
+                    ),
                   const SizedBox(height: 12),
 
                   if (_errorMessage != null)
