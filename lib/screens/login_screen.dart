@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -189,18 +190,29 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Column(
-                    children: [
-                                      const Text(
-                        '👑',
-                        style: TextStyle(fontSize: 45),
+                  Center(
+                    child: SizedBox(
+                      width: 100,
+                      height: 100,
+                      child: Stack(
+                        children: [
+                          Icon(
+                            Icons.hotel,
+                            size: 100,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          Positioned(
+                            left: 18,
+                            top: 12,
+                            child: Icon(
+                              Symbols.crown,
+                              size: 22,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ],
                       ),
-                      Icon(
-                        Icons.night_shelter,
-                        size: 100,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ],
+                    ),
                   ),
                   const SizedBox(height: 24),
 
