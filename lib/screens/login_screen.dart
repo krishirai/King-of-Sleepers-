@@ -189,10 +189,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(
-                    Icons.self_improvement,
-                    size: 100,
-                    color: Theme.of(context).colorScheme.primary,
+                  Column(
+                    children: [
+                                      const Text(
+                        '👑',
+                        style: TextStyle(fontSize: 45),
+                      ),
+                      Icon(
+                        Icons.night_shelter,
+                        size: 100,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 24),
 
