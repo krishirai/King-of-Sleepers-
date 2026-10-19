@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 /// Screen that lets the current user rate a specific location (1-5 stars
 /// + optional comment) and stores/updates the aggregate rating for that
@@ -185,6 +186,22 @@ class _RatingScreenState extends State<RatingScreen> {
   }
 
   // ---------------------------------------------------------------
+  // LOGOUT
+  // ---------------------------------------------------------------
+  Future<void> _logout() async {
+    // Close every page opened on top of the first one, so the user
+    // isn't left on this screen after signing out.
+    Navigator.of(context).popUntil((route) => route.isFirst);
+
+    try {
+      await GoogleSignIn.instance.signOut();
+    } catch (_) {
+      // User didn't sign in with Google, nothing to do.
+    }
+    await _auth.signOut();
+  }
+
+  // ---------------------------------------------------------------
   // UI
   // ---------------------------------------------------------------
   Widget _buildStarSelector() {
@@ -218,6 +235,13 @@ class _RatingScreenState extends State<RatingScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Rate ${widget.locationName}'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: _isLoading ? null : _logout,
+          ),
+        ],
       ),
       body: SafeArea(
         child: _isFetchingExisting
