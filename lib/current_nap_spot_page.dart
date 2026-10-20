@@ -37,10 +37,16 @@ class _CurrentNapSpotPageState extends State<CurrentNapSpotPage> {
   }
 
   Future<void> _getCurrentLocation() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoadingLocation = true;
+      _locationError = null;
+    });
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
 
       if (!serviceEnabled) {
+        if (!mounted) return;
         setState(() {
           _locationError = 'Location services are turned off.';
           _isLoadingLocation = false;
@@ -55,6 +61,7 @@ class _CurrentNapSpotPageState extends State<CurrentNapSpotPage> {
       }
 
       if (permission == LocationPermission.denied) {
+        if (!mounted) return;
         setState(() {
           _locationError = 'Location permission was denied.';
           _isLoadingLocation = false;
@@ -63,6 +70,7 @@ class _CurrentNapSpotPageState extends State<CurrentNapSpotPage> {
       }
 
       if (permission == LocationPermission.deniedForever) {
+        if (!mounted) return;
         setState(() {
           _locationError =
               'Location permission is permanently denied. Please enable it in settings.';

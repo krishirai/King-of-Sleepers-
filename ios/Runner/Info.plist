@@ -66,5 +66,20 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>King of Sleepers uses your location to show your distance from a nap spot and help you find directions.</string>
+	<key>GIDClientID</key>
+	<string>1079540447962-nltq8uf11fgf751hk2uspnosvpinch8b.apps.googleusercontent.com</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.1079540447962-nltq8uf11fgf751hk2uspnosvpinch8b</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
