@@ -104,6 +104,8 @@ class NapPlacesPage extends StatelessWidget {
                         availableSeats: availableSeats,
                         hasPowerSocket: hasPowerSocket,
                         seatingType: seatingType,
+                        latitude: latitude,
+                        longitude: longitude,
                       ),
                     ),
                   );

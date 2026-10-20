@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'screens/rating_screen.dart';
 
 class NapPlaceDetailsPage extends StatelessWidget {
@@ -9,6 +10,8 @@ class NapPlaceDetailsPage extends StatelessWidget {
   final int availableSeats;
   final bool? hasPowerSocket;
   final String seatingType;
+  final double? latitude;
+  final double? longitude;
 
   const NapPlaceDetailsPage({
     super.key,
@@ -18,6 +21,8 @@ class NapPlaceDetailsPage extends StatelessWidget {
     required this.availableSeats,
     this.hasPowerSocket,
     this.seatingType = 'Not specified',
+    this.latitude,
+    this.longitude,
   });
 
   @override
@@ -27,6 +32,20 @@ class NapPlaceDetailsPage extends StatelessWidget {
         : hasPowerSocket!
             ? 'Available'
             : 'Not available';
+
+    final String? mapsLink = latitude != null && longitude != null
+        ? Uri.https('www.google.com', '/maps/search/', {
+            'api': '1',
+            'query': '$latitude,$longitude',
+          }).toString()
+        : null;
+    final mapsSuffix = mapsLink == null ? '' : '\nMap: $mapsLink';
+    final shareText = 'Check out this nap spot on campus!\n'
+        '$name\n'
+        'Location: $location\n'
+        'Available seats: $availableSeats\n'
+        'Power socket: $socketText\n'
+        'Seating type: $seatingType$mapsSuffix';
 
     return Scaffold(
       appBar: AppBar(
@@ -66,7 +85,34 @@ class NapPlaceDetailsPage extends StatelessWidget {
             title: const Text('Seating Type'),
             subtitle: Text(seatingType),
           ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 18),
+          Builder(
+            builder: (shareContext) => OutlinedButton.icon(
+              icon: const Icon(Icons.share),
+              label: const Text('Share This Location'),
+              onPressed: () async {
+                final box = shareContext.findRenderObject() as RenderBox?;
+                try {
+                  await SharePlus.instance.share(
+                    ShareParams(
+                      text: shareText,
+                      subject: 'Campus nap spot: $name',
+                      sharePositionOrigin: box == null
+                          ? null
+                          : box.localToGlobal(Offset.zero) & box.size,
+                    ),
+                  );
+                } catch (_) {
+                  if (shareContext.mounted) {
+                    ScaffoldMessenger.of(shareContext).showSnackBar(
+                      const SnackBar(content: Text('Unable to share this location.')),
+                    );
+                  }
+                }
+              },
+            ),
+          ),
+          const SizedBox(height: 14),
           ElevatedButton.icon(
             icon: const Icon(Icons.star),
             label: const Text('Rate This Location'),

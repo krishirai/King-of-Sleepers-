@@ -1,0 +1,34 @@
+King of Sleepers - Sprint 2 integration with current team GitHub main
+===================================================================
+Compared with: King-of-Sleepers-GitHub-Review.zip and the previously tested
+King-of-Sleepers-Sprint2-Firebase-Dependency-Fixed.zip.
+
+Only FIVE files are changed in this zip:
+- lib/nap_place_details_page.dart: adds tested detail-page Share This Location
+- lib/nap_places_page.dart: passes location coordinates to details; keeps
+  the list-level quick share button already present on GitHub
+- lib/current_nap_spot_page.dart: protects async location setState calls
+- ios/Runner/GoogleService-Info.plist: uses new Firebase project for iOS
+- ios/Runner/Info.plist: iOS location explanation / Google sign-in callback
+
+Preserved team GitHub version (not replaced):
+- login_screen.dart: crown icon, Forgot password, and other team changes
+- rating_screen.dart: existing logout and rating features
+- pubspec.yaml: compatible share_plus + material_symbols_icons
+- test files, README, and the rest of the source tree
+- android/app/google-services.json, lib/firebase_options.dart and firebase.json:
+  already use the new Firebase project, so unchanged
+
+Apply to the CLONED GITHUB FOLDER ONLY (the one with the .git directory),
+while on branch bright-sprint2-firebase-integration. The ZIP paths are
+relative to the project root; extracting with overwrite changes only these
+five files. Do not extract into the older tested ZIP's folder.
+
+After applying:
+  git status
+  git diff --stat
+  flutter pub get
+  flutter run -d chrome
+
+Do not commit or push until you verify the functions and diffs. iOS
+build and live Firebase access were NOT tested in this environment.
