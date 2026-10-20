@@ -1,7 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import '../auth_error_messages.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,18 +23,46 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _isLogin = true;
   bool _isLoading = false;
-  bool _googleInitialized = false;
+  // GoogleSignIn 7.x must be initialized only once per app lifetime.
+  static Future<void>? _googleInitialization;
   String? _errorMessage;
 
-  @override
-  void initState() {
-    super.initState();
-    _initGoogleSignIn();
+  Future<void> _ensureGoogleInitialized() async {
+    final pending = _googleInitialization;
+    if (pending != null) {
+      await pending;
+      return;
+    }
+
+    final initialization = GoogleSignIn.instance.initialize();
+    _googleInitialization = initialization;
+    try {
+      await initialization;
+    } catch (_) {
+      // Initialization may be retried after a transient platform failure.
+      _googleInitialization = null;
+      rethrow;
+    }
   }
 
-  Future<void> _initGoogleSignIn() async {
-    await GoogleSignIn.instance.initialize();
-    _googleInitialized = true;
+  void _showFirebaseError(FirebaseAuthException error) {
+    if (!mounted) return;
+    setState(() {
+      _errorMessage = firebaseAuthErrorText(
+        error.code,
+        details: error.message,
+        includeDiagnostics: kDebugMode,
+      );
+    });
+  }
+
+  void _showUnexpectedError(String friendlyMessage, Object error) {
+    if (!mounted) return;
+    setState(() {
+      _errorMessage = kDebugMode
+          ? '$friendlyMessage\nDebug type: ${error.runtimeType}'
+          : friendlyMessage;
+    });
   }
 
   @override
@@ -52,22 +84,29 @@ class _LoginScreenState extends State<LoginScreen> {
       if (_isLogin) {
         await _auth.signInWithEmailAndPassword(
           email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
+          // Spaces can be part of a password.
+          password: _passwordController.text,
         );
       } else {
         await _auth.createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
+          // Spaces can be part of a password.
+          password: _passwordController.text,
         );
       }
     } on FirebaseAuthException catch (e) {
+      _showFirebaseError(e);
+    } on PlatformException catch (e) {
+      if (!mounted) return;
       setState(() {
-        _errorMessage = _mapAuthError(e.code);
+        _errorMessage = firebaseAuthErrorText(
+          e.code,
+          details: e.message,
+          includeDiagnostics: kDebugMode,
+        );
       });
     } catch (e) {
-      setState(() {
-        _errorMessage = 'Something went wrong. Please try again.';
-      });
+      _showUnexpectedError('Something went wrong. Please try again.', e);
     } finally {
       if (mounted) {
         setState(() {
@@ -84,9 +123,9 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      if (!_googleInitialized) {
-        await GoogleSignIn.instance.initialize();
-        _googleInitialized = true;
+      await _ensureGoogleInitialized();
+      if (!GoogleSignIn.instance.supportsAuthenticate()) {
+        throw StateError('Google interactive sign-in is not supported here.');
       }
 
       final GoogleSignInAccount googleUser =
@@ -95,28 +134,36 @@ class _LoginScreenState extends State<LoginScreen> {
       final GoogleSignInAuthentication googleAuth =
           googleUser.authentication;
 
+      if (googleAuth.idToken == null) {
+        throw StateError('Google did not return an ID token; check OAuth setup.');
+      }
       final credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
 
       await _auth.signInWithCredential(credential);
     } on GoogleSignInException catch (e) {
-      if (e.code == GoogleSignInExceptionCode.canceled) {
-        setState(() => _isLoading = false);
-        return;
-      }
-
+      if (e.code == GoogleSignInExceptionCode.canceled) return;
+      if (!mounted) return;
       setState(() {
-        _errorMessage = 'Could not sign in with Google.';
+        _errorMessage = kDebugMode
+            ? 'Google sign-in failed.\nDebug: ${e.code}\n'
+                '${safeAuthDiagnostic(e.description)}'
+            : 'Could not sign in with Google. Please try again.';
       });
     } on FirebaseAuthException catch (e) {
+      _showFirebaseError(e);
+    } on PlatformException catch (e) {
+      if (!mounted) return;
       setState(() {
-        _errorMessage = _mapAuthError(e.code);
+        _errorMessage = firebaseAuthErrorText(
+          e.code,
+          details: e.message,
+          includeDiagnostics: kDebugMode,
+        );
       });
     } catch (e) {
-      setState(() {
-        _errorMessage = 'Could not sign in with Google.';
-      });
+      _showUnexpectedError('Could not sign in with Google.', e);
     } finally {
       if (mounted) {
         setState(() {
@@ -152,28 +199,11 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
     } on FirebaseAuthException catch (e) {
-      setState(() => _errorMessage = _mapAuthError(e.code));
+      _showFirebaseError(e);
     } catch (e) {
-      setState(() => _errorMessage = 'Something went wrong. Please try again.');
+      _showUnexpectedError('Something went wrong. Please try again.', e);
     } finally {
       if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  String _mapAuthError(String code) {
-    switch (code) {
-      case 'user-not-found':
-        return 'No account found with that email.';
-      case 'wrong-password':
-        return 'Incorrect password.';
-      case 'email-already-in-use':
-        return 'An account already exists with that email.';
-      case 'invalid-email':
-        return 'That email address is not valid.';
-      case 'weak-password':
-        return 'Password must be at least 6 characters.';
-      default:
-        return 'Authentication error ($code).';
     }
   }
 
@@ -310,6 +340,15 @@ class _LoginScreenState extends State<LoginScreen> {
                           : 'Already have an account? Sign in',
                     ),
                   ),
+
+                  if (kDebugMode) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      'Firebase project: ${Firebase.app().options.projectId}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
 
                   const SizedBox(height: 24),
                   const Row(
