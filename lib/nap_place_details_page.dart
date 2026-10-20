@@ -1,8 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'screens/rating_screen.dart';
-
+ 
 class NapPlaceDetailsPage extends StatelessWidget {
   final String locationId;
   final String name;
@@ -12,7 +11,7 @@ class NapPlaceDetailsPage extends StatelessWidget {
   final String seatingType;
   final double? latitude;
   final double? longitude;
-
+ 
   const NapPlaceDetailsPage({
     super.key,
     required this.locationId,
@@ -24,7 +23,7 @@ class NapPlaceDetailsPage extends StatelessWidget {
     this.latitude,
     this.longitude,
   });
-
+ 
   @override
   Widget build(BuildContext context) {
     final String socketText = hasPowerSocket == null
@@ -32,7 +31,7 @@ class NapPlaceDetailsPage extends StatelessWidget {
         : hasPowerSocket!
             ? 'Available'
             : 'Not available';
-
+ 
     final String? mapsLink = latitude != null && longitude != null
         ? Uri.https('www.google.com', '/maps/search/', {
             'api': '1',
@@ -46,9 +45,11 @@ class NapPlaceDetailsPage extends StatelessWidget {
         'Available seats: $availableSeats\n'
         'Power socket: $socketText\n'
         'Seating type: $seatingType$mapsSuffix';
-
+ 
     return Scaffold(
       appBar: AppBar(
+        // Explicit back button: returns to the nap places list.
+        leading: const BackButton(),
         title: Text(name),
       ),
       body: ListView(

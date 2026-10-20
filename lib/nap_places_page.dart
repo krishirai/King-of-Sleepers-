@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'current_nap_spot_page.dart';
 import 'nap_place_details_page.dart';
+import 'screens/campus_map.dart';
 import 'package:share_plus/share_plus.dart';
 
 class NapPlacesPage extends StatelessWidget {
@@ -14,6 +15,17 @@ class NapPlacesPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Napping Places'),
         actions: [
+          // Opens the AUT campus map with all nap spots and live location.
+          IconButton(
+            icon: const Icon(Icons.map),
+            tooltip: 'Campus map',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CampusMapScreen()),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
