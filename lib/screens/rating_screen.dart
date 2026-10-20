@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:google_sign_in/google_sign_in.dart';
+ 
 /// Screen that lets the current user rate a specific location (1-5 stars
 /// + optional comment) and stores/updates the aggregate rating for that
 /// location in Firestore.
@@ -19,40 +20,40 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class RatingScreen extends StatefulWidget {
   final String locationId;
   final String locationName;
-
+ 
   const RatingScreen({
     super.key,
     required this.locationId,
     required this.locationName,
   });
-
+ 
   @override
   State<RatingScreen> createState() => _RatingScreenState();
 }
-
+ 
 class _RatingScreenState extends State<RatingScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController _commentController = TextEditingController();
-
+ 
   int _selectedStars = 0;
   bool _isLoading = false;
   bool _isFetchingExisting = true;
   String? _errorMessage;
   String? _successMessage;
-
+ 
   @override
   void initState() {
     super.initState();
     _loadExistingRating();
   }
-
+ 
   @override
   void dispose() {
     _commentController.dispose();
     super.dispose();
   }
-
+ 
   // ---------------------------------------------------------------
   // LOAD EXISTING RATING (if the user already rated this location)
   // ---------------------------------------------------------------
@@ -62,7 +63,7 @@ class _RatingScreenState extends State<RatingScreen> {
       setState(() => _isFetchingExisting = false);
       return;
     }
-
+ 
     try {
       final doc = await _firestore
           .collection('nap_places')
@@ -70,8 +71,9 @@ class _RatingScreenState extends State<RatingScreen> {
           .collection('ratings')
           .doc(user.uid)
           .get();
-
-      if (doc.exists) {
+ 
+      // The user may have gone back while this was loading.
+      if (doc.exists && mounted) {
         final data = doc.data()!;
         setState(() {
           _selectedStars = (data['rating'] as num?)?.toInt() ?? 0;
@@ -86,55 +88,55 @@ class _RatingScreenState extends State<RatingScreen> {
       }
     }
   }
-
+ 
   // ---------------------------------------------------------------
   // SUBMIT RATING
   // ---------------------------------------------------------------
   Future<void> _submitRating() async {
     final user = _auth.currentUser;
-
+ 
     if (user == null) {
       setState(() {
         _errorMessage = 'You need to be signed in to rate a location.';
       });
       return;
     }
-
+ 
     if (_selectedStars == 0) {
       setState(() {
         _errorMessage = 'Please select a star rating.';
       });
       return;
     }
-
+ 
     setState(() {
       _isLoading = true;
       _errorMessage = null;
       _successMessage = null;
     });
-
+ 
     final locationRef =
         _firestore.collection('nap_places').doc(widget.locationId);
     final ratingRef = locationRef.collection('ratings').doc(user.uid);
-
+ 
     try {
       await _firestore.runTransaction((transaction) async {
         final ratingSnap = await transaction.get(ratingRef);
         final locationSnap = await transaction.get(locationRef);
-
+ 
         final previousRating =
             ratingSnap.exists ? (ratingSnap.data()?['rating'] as num?)?.toInt() : null;
-
+ 
         final currentCount = locationSnap.exists
             ? (locationSnap.data()?['ratingCount'] as num?)?.toInt() ?? 0
             : 0;
         final currentAvg = locationSnap.exists
             ? (locationSnap.data()?['avgRating'] as num?)?.toDouble() ?? 0.0
             : 0.0;
-
+ 
         int newCount;
         double newAvg;
-
+ 
         if (previousRating != null) {
           // User is updating their existing rating: adjust the sum, keep count.
           final currentSum = currentAvg * currentCount;
@@ -147,14 +149,14 @@ class _RatingScreenState extends State<RatingScreen> {
           newCount = currentCount + 1;
           newAvg = (currentSum + _selectedStars) / newCount;
         }
-
+ 
         transaction.set(ratingRef, {
           'rating': _selectedStars,
           'comment': _commentController.text.trim(),
           'userEmail': user.email,
           'timestamp': FieldValue.serverTimestamp(),
         });
-
+ 
         transaction.set(
           locationRef,
           {
@@ -165,15 +167,19 @@ class _RatingScreenState extends State<RatingScreen> {
           SetOptions(merge: true),
         );
       });
-
+ 
+      // Skip UI updates if the user already left this page.
+      if (!mounted) return;
       setState(() {
         _successMessage = 'Thanks for rating this location!';
       });
     } on FirebaseException catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'Could not save your rating (${e.code}).';
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'Something went wrong. Please try again.';
       });
@@ -183,7 +189,23 @@ class _RatingScreenState extends State<RatingScreen> {
       }
     }
   }
-
+ 
+  // ---------------------------------------------------------------
+  // LOGOUT
+  // ---------------------------------------------------------------
+  Future<void> _logout() async {
+    // Close every page opened on top of the first one, so the user
+    // isn't left on this screen after signing out.
+    Navigator.of(context).popUntil((route) => route.isFirst);
+ 
+    try {
+      await GoogleSignIn.instance.signOut();
+    } catch (_) {
+      // User didn't sign in with Google, nothing to do.
+    }
+    await _auth.signOut();
+  }
+ 
   // ---------------------------------------------------------------
   // UI
   // ---------------------------------------------------------------
@@ -212,12 +234,21 @@ class _RatingScreenState extends State<RatingScreen> {
       }),
     );
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        // Explicit back button: returns to the nap place details page.
+        leading: const BackButton(),
         title: Text('Rate ${widget.locationName}'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: _isLoading ? null : _logout,
+          ),
+        ],
       ),
       body: SafeArea(
         child: _isFetchingExisting
@@ -235,10 +266,10 @@ class _RatingScreenState extends State<RatingScreen> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 24),
-
+ 
                       _buildStarSelector(),
                       const SizedBox(height: 24),
-
+ 
                       TextFormField(
                         controller: _commentController,
                         maxLines: 4,
@@ -250,7 +281,7 @@ class _RatingScreenState extends State<RatingScreen> {
                         ),
                       ),
                       const SizedBox(height: 12),
-
+ 
                       if (_errorMessage != null)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 12),
@@ -260,7 +291,7 @@ class _RatingScreenState extends State<RatingScreen> {
                             textAlign: TextAlign.center,
                           ),
                         ),
-
+ 
                       if (_successMessage != null)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 12),
@@ -270,7 +301,7 @@ class _RatingScreenState extends State<RatingScreen> {
                             textAlign: TextAlign.center,
                           ),
                         ),
-
+ 
                       ElevatedButton(
                         onPressed: _isLoading ? null : _submitRating,
                         style: ElevatedButton.styleFrom(
